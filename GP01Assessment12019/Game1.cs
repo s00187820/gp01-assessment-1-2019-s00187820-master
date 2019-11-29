@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 namespace GP01Assessment12019
 {
@@ -12,6 +14,10 @@ namespace GP01Assessment12019
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+
+        private List<Sprite> _sprites;
+
+        
         string StudentID = Activity.StudentID;
         string StudentName = Activity.Name;
         public Game1()
@@ -45,7 +51,16 @@ namespace GP01Assessment12019
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            var playerTexture = Content.Load<Texture2D>("Player");
+
+            _sprites = new List<Sprite>()
+            {
+                new Player(playerTexture)
+                {
+                Position = new Vector2(100,100),
+                Bullet = new Bullet(Content.Load<Texture2D>("Bullet")),
+                }
+            };
         }
 
         /// <summary>
@@ -64,12 +79,26 @@ namespace GP01Assessment12019
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            foreach (var sprite in _sprites.ToArray())
+                sprite.Update(gameTime, _sprites);
 
-            // TODO: Add your update logic here
+            PostUpdate();
 
             base.Update(gameTime);
+        }
+
+        private void PostUpdate()
+        {
+            for (int i = 0; i < _sprites.Count; i++)
+            {
+                if (_sprites[i].IsRemoved)
+
+                {
+                    _sprites.RemoveAt(i);
+                    i--;
+                }
+
+            }
         }
 
         /// <summary>
@@ -80,7 +109,12 @@ namespace GP01Assessment12019
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin();
+            foreach (var sprite in _sprites)
+                sprite.Draw(spriteBatch);
+            spriteBatch.End();
+            spriteBatch.End();
+           
 
             base.Draw(gameTime);
         }
