@@ -15,9 +15,14 @@ namespace GP01Assessment12019
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private Camera _camera;
+
+        private List<Component> _components;
+
         private List<Sprite> _sprites;
 
-        
+        private Player _player;
+
         string StudentID = Activity.StudentID;
         string StudentName = Activity.Name;
         public Game1()
@@ -38,7 +43,7 @@ namespace GP01Assessment12019
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            Activity.Track("Implementing basic game play");
+            Activity.Track("Implementing enemy sentry");
             base.Initialize();
         }
 
@@ -51,6 +56,12 @@ namespace GP01Assessment12019
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            _camera = new Camera();
+
+            _components = new List<Component>()
+            {
+
+            };
             var playerTexture = Content.Load<Texture2D>("Player");
 
             _sprites = new List<Sprite>()

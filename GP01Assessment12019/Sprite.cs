@@ -29,6 +29,8 @@ namespace GP01Assessment12019
 
         public bool IsRemoved = false;
 
+        public object Rectangle { get; internal set; }
+
         public Sprite(Texture2D texture)
         {
             _texture = texture;
