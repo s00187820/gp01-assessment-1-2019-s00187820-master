@@ -43,6 +43,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AnimatedSprite.cs" />
+    <Compile Include="Camera.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Health.cs" />
     <Compile Include="Player.cs" />
@@ -78,6 +79,14 @@
     <Content Include="Content\hit.wav" />
     <Content Include="Content\Player.png" />
     <Content Include="Content\shoot.wav" />
+    <Content Include="Content\Tiles\collider.png" />
+    <Content Include="Content\Tiles\se_free_dirt_texture.jpg" />
+    <Content Include="Content\Tiles\se_free_grass_texture.jpg" />
+    <Content Include="Content\Tiles\se_free_ground_texture.jpg" />
+    <Content Include="Content\Tiles\se_free_mud_texture.jpg" />
+    <Content Include="Content\Tiles\se_free_road_texture.jpg" />
+    <Content Include="Content\Tiles\se_free_rock_texture.jpg" />
+    <Content Include="Content\Tiles\se_free_wood_texture.jpg" />
     <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +101,7 @@
       <Name>ActivityTracker</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
