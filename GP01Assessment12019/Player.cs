@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -12,48 +11,39 @@ namespace GP01Assessment12019
 {
     public class Player : Sprite
     {
-        public Bullet Bullet;
+        public float Speed { get; set; } = 5f;
 
-        public Player(Texture2D texture)
-            : base(texture)
+        public Player(Texture2D texture, Vector2 userPosition, int framecount)
+            : base(texture, userPosition, framecount)
         {
-
+        }
+        public Player(Texture2D texture, Vector2 userPosition, int framecount, Vector2 worldBound)
+            : base(texture, userPosition, framecount)
+        {
+            WorldBound = worldBound;
         }
 
-        public override void Update(GameTime gameTime, List<Sprite> sprites)
+
+        public override void Draw(SpriteBatch spriteBatch)
         {
-            _previousKey = _currentKey;
-            _currentKey = Keyboard.GetState();
-
-
-            if (_currentKey.IsKeyDown(Keys.A))
-                _rotation -= MathHelper.ToRadians(RotationVelocity);
-            else if (_currentKey.IsKeyDown(Keys.D))
-                _rotation += MathHelper.ToRadians(RotationVelocity);
-
-            Direction = new Vector2((float)Math.Cos(_rotation), (float)Math.Sin(_rotation));
-
-            if (_currentKey.IsKeyDown(Keys.W))
-                Position += Direction * LinearVelocity;
-
-            if (_currentKey.IsKeyDown(Keys.Space) &&
-                _previousKey.IsKeyUp(Keys.Space))
-            {
-                AddBullet(sprites);
-
-            }
+            base.Draw(spriteBatch);
         }
 
-        private void AddBullet(List<Sprite> sprites)
-        {
-            var bullet = Bullet.Clone() as Bullet;
-            bullet.Direction = this.Direction;
-            bullet.Position = this.Position;
-            bullet.LinearVelocity = this.LinearVelocity * 2;
-            bullet.LifeSpan = 2f;
-            bullet.Parent = this;
-
-            sprites.Add(bullet);
+        public override void Update(GameTime gametime)
+        {// move the player
+            // Up
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+                Move(new Vector2(0, -Speed));
+            // Down
+            if (Keyboard.GetState().IsKeyDown(Keys.S))
+                Move(new Vector2(0, Speed));
+            // Right
+            if (Keyboard.GetState().IsKeyDown(Keys.A))
+                Move(new Vector2(-Speed, 0));
+            // Left
+            if (Keyboard.GetState().IsKeyDown(Keys.D))
+                Move(new Vector2(Speed, 0));
+            base.Update(gametime);
         }
     }
 }

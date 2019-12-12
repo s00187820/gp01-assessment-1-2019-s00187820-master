@@ -1,5 +1,6 @@
 ﻿using ActivityTracker;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -14,14 +15,18 @@ namespace GP01Assessment12019
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Sprite ProjectileSprite;
+        Player playerSprite;
+        Vector2 _target;
+        Vector2 _startPos;
+        MouseState previous, current;
+        HealthBar healthBarObject;
+        SoundEffectInstance shoot, hit;
+        //private Camera _camera;
 
-        private Camera _camera;
+        
 
-        private List<Component> _components;
-
-        private List<Sprite> _sprites;
-
-        private Player _player;
+        
 
         string StudentID = Activity.StudentID;
         string StudentName = Activity.Name;
@@ -43,7 +48,8 @@ namespace GP01Assessment12019
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            Activity.Track("Implementing enemy sentry");
+            Activity.Track("Basic function");
+            IsMouseVisible = true;
             base.Initialize();
         }
 
@@ -55,23 +61,21 @@ namespace GP01Assessment12019
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            Texture2D tx = Content.Load<Texture2D>("chaser");
+            _startPos = GraphicsDevice.Viewport.Bounds.Center.ToVector2() - tx.Bounds.Center.ToVector2();
 
-            _camera = new Camera();
+            playerSprite = new Player(Content.Load<Texture2D>("Player"),
+                _startPos, 1,
+                GraphicsDevice.Viewport.Bounds.Size.ToVector2());
 
-            _components = new List<Component>()
-            {
+            ProjectileSprite = new Sprite(tx, _startPos, 1);
+            playerSprite.Visible = true;
+            healthBarObject = new HealthBar(this, 100, _startPos);
 
-            };
-            var playerTexture = Content.Load<Texture2D>("Player");
-
-            _sprites = new List<Sprite>()
-            {
-                new Player(playerTexture)
-                {
-                Position = new Vector2(100,100),
-                Bullet = new Bullet(Content.Load<Texture2D>("Bullet")),
-                }
-            };
+            // Make Sound Effect
+            SoundEffect kiss = Content.Load<SoundEffect>("hit");
+            shoot = kiss.CreateInstance();
+            hit = Content.Load<SoundEffect>("shoot").CreateInstance();
         }
 
         /// <summary>
@@ -90,26 +94,57 @@ namespace GP01Assessment12019
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            foreach (var sprite in _sprites.ToArray())
-                sprite.Update(gameTime, _sprites);
 
-            PostUpdate();
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
+            // Sample the mouse state one click at a time
+
+            current = Mouse.GetState();
+            // if the Mouse is in current Viewport
+            if (GraphicsDevice.Viewport.Bounds.Contains(current.Position))
+            {
+                // if the mouse left button has been pressed and is now released and the Projectile sprite is visible
+                if (previous.LeftButton == ButtonState.Pressed &&
+                 current.LeftButton == ButtonState.Released &&
+                  !ProjectileSprite.Visible)
+                {
+                    // set the target for the movement to the current mouse position 
+                    // Change the state of the Projectile and
+                    // Decrease the healthbar value and play the sound effect
+                    _target = current.Position.ToVector2();
+                    ProjectileSprite.Visible = true;
+                    healthBarObject.health -= 10;
+                    if (shoot.State != SoundState.Playing)
+                        shoot.Play();
+                }
+                else
+                { // If We are moving
+                  // Check for Target acquired
+                    if (Vector2.Distance(ProjectileSprite.position, _target) < 10
+                        && ProjectileSprite.Visible)
+                    { // change the state of teh Projectile and move it back to it's initial position
+                        ProjectileSprite.Visible = false;
+                        ProjectileSprite.position = _startPos;
+                    }
+                    // Otherwise if we are moving then keep moving towards the target
+                    else if (ProjectileSprite.Visible)
+                        ProjectileSprite.position = Vector2.Lerp(ProjectileSprite.position, _target, 0.1f);
+                }
+            }
+            // Update the projectile animation
+            ProjectileSprite.Update(gameTime);
+            previous = current;
+            // Update the player for Key presses and then for animation
+            playerSprite.Update(gameTime);
+            // Check for collision between Projectile and player
+
+            if (playerSprite.collisionDetect(ProjectileSprite))
+            {
+                if (hit.State != SoundState.Playing)
+                    hit.Play();
+            }
 
             base.Update(gameTime);
-        }
-
-        private void PostUpdate()
-        {
-            for (int i = 0; i < _sprites.Count; i++)
-            {
-                if (_sprites[i].IsRemoved)
-
-                {
-                    _sprites.RemoveAt(i);
-                    i--;
-                }
-
-            }
         }
 
         /// <summary>
@@ -119,13 +154,12 @@ namespace GP01Assessment12019
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
             spriteBatch.Begin();
-            foreach (var sprite in _sprites)
-                sprite.Draw(spriteBatch);
+            ProjectileSprite.Draw(spriteBatch);
+            healthBarObject.Draw(spriteBatch);
+            playerSprite.Draw(spriteBatch);
             spriteBatch.End();
-            spriteBatch.End();
-           
+            // TODO: Add your drawing code here
 
             base.Draw(gameTime);
         }
